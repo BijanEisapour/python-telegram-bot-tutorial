@@ -132,6 +132,21 @@ def forward_message_handler(update: telegram.Update, context: telegram.ext.Callb
                                 message_id=update.message.message_id)
 
 
+def photo_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    context.bot.send_photo(update.message.chat_id, photo=open("./assets/photo.jpg", 'rb'))
+    context.bot.send_photo(update.message.chat_id,
+                           "https://via.placeholder.com/150/1aaaaa/fafafa?Text=This+is+a+sample+text")
+
+
+def sticker_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    context.bot.send_sticker(chat_id=update.message.chat_id,
+                             sticker='CAACAgIAAxkBAAM7YXGEbabBdFjAdII5NmaMJJ-PfSoAAvcAA1advQoLciQdSPQNMCEE')
+
+
+def sticker_message_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    update.message.reply_text(update.message.sticker.file_id)
+
+
 def main():
     print("initializing updater ...")
     updater = telegram.ext.Updater(TOKEN, use_context=True)
@@ -147,11 +162,14 @@ def main():
     dispatcher.add_handler(telegram.ext.CommandHandler("bold", bold_command_handler))
     dispatcher.add_handler(telegram.ext.CommandHandler("italic", italic_command_handler))
     dispatcher.add_handler(telegram.ext.CommandHandler("monospace", monospace_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("photo", photo_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("sticker", sticker_command_handler))
     
     print("initializing message handlers ...")
     # dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, hello_message_handler))
     # dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, reply_message_handler))
-    dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, forward_message_handler))
+    # dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, forward_message_handler))
+    dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.sticker, sticker_message_handler))
     
     print("initializing inline query handlers ...")
     dispatcher.add_handler(telegram.ext.InlineQueryHandler(inline_query_handler))
