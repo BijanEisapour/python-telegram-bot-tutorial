@@ -45,6 +45,24 @@ def hello_message_handler(update: telegram.Update, context: telegram.ext.Callbac
         update.message.reply_text("Hello, friend!")
 
 
+def math_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    first_number = float(context.args[0])
+    operator = context.args[1]
+    second_number = float(context.args[2])
+    
+    result = "<NOT IMPLEMENTED>"
+    if operator == "+":
+        result = first_number + second_number
+    elif operator == "-":
+        result = first_number - second_number
+    elif operator == "*":
+        result = first_number * second_number
+    elif operator == "/":
+        result = first_number / second_number
+    
+    update.message.reply_text(f"{result:.2f}")
+
+
 def main():
     print("initializing updater ...")
     updater = telegram.ext.Updater(TOKEN, use_context=True)
@@ -56,6 +74,7 @@ def main():
     dispatcher.add_handler(telegram.ext.CommandHandler("start", start_command_handler))
     dispatcher.add_handler(telegram.ext.CommandHandler("help", help_command_handler))
     dispatcher.add_handler(telegram.ext.CommandHandler("about", about_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("math", math_command_handler))
     
     print("initializing message handlers ...")
     dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, hello_message_handler))
