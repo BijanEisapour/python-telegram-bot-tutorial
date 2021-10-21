@@ -123,6 +123,15 @@ def inline_query_handler(update: telegram.Update, context: telegram.ext.Callback
     update.inline_query.answer(results)
 
 
+def reply_message_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    update.message.reply_text("@BijanProgrammer", reply_to_message_id=update.message.message_id)
+
+
+def forward_message_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    context.bot.forward_message(chat_id=update.message.chat_id, from_chat_id=update.message.chat_id,
+                                message_id=update.message.message_id)
+
+
 def main():
     print("initializing updater ...")
     updater = telegram.ext.Updater(TOKEN, use_context=True)
@@ -140,7 +149,9 @@ def main():
     dispatcher.add_handler(telegram.ext.CommandHandler("monospace", monospace_command_handler))
     
     print("initializing message handlers ...")
-    dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, hello_message_handler))
+    # dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, hello_message_handler))
+    # dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, reply_message_handler))
+    dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, forward_message_handler))
     
     print("initializing inline query handlers ...")
     dispatcher.add_handler(telegram.ext.InlineQueryHandler(inline_query_handler))
