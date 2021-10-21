@@ -36,13 +36,15 @@ def hello_message_handler(update: telegram.Update, context: telegram.ext.Callbac
     
     if first_name != '':
         if last_name != '':
-            update.message.reply_text(f"Hello, {first_name} {last_name}!")
+            update.message.reply_text(f"Hello, [{first_name} {last_name}](tg://user?id={user.id})!",
+                                      parse_mode=telegram.ParseMode.MARKDOWN)
         else:
             update.message.reply_text(f"Hello, {first_name}!")
     elif username != '':
         update.message.reply_text(f"Hello, {username}!")
-    else:
-        update.message.reply_text("Hello, friend!")
+    
+    update.message.reply_text(f"Hello, [friend](tg://user?id={user.id})!",
+                              parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 def math_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
@@ -63,6 +65,64 @@ def math_command_handler(update: telegram.Update, context: telegram.ext.Callback
     update.message.reply_text(f"{result:.2f}")
 
 
+def bold_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    text = " ".join(context.args)
+    
+    update.message.reply_text(f"*{telegram.utils.helpers.escape_markdown(text)}*",
+                              parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+def italic_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    text = " ".join(context.args)
+    
+    update.message.reply_text(f"_{telegram.utils.helpers.escape_markdown(text)}_",
+                              parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+def monospace_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    text = " ".join(context.args)
+    
+    result = f"""
+```
+{text}
+```
+"""
+    
+    update.message.reply_text(result, parse_mode=telegram.ParseMode.MARKDOWN)
+
+
+def inline_query_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    print(update)
+    query = update.inline_query.query
+    
+    if query == "":
+        return
+    
+    results = [
+        telegram.InlineQueryResultArticle(
+            id="1",
+            title="Caps",
+            input_message_content=telegram.InputTextMessageContent(query.upper()),
+        ),
+        telegram.InlineQueryResultArticle(
+            id="2",
+            title="Bold",
+            input_message_content=telegram.InputTextMessageContent(
+                f"*{telegram.utils.helpers.escape_markdown(query)}*", parse_mode=telegram.ParseMode.MARKDOWN
+            ),
+        ),
+        telegram.InlineQueryResultArticle(
+            id="3",
+            title="Italic",
+            input_message_content=telegram.InputTextMessageContent(
+                f"_{telegram.utils.helpers.escape_markdown(query)}_", parse_mode=telegram.ParseMode.MARKDOWN
+            ),
+        ),
+    ]
+    
+    update.inline_query.answer(results)
+
+
 def main():
     print("initializing updater ...")
     updater = telegram.ext.Updater(TOKEN, use_context=True)
@@ -75,9 +135,15 @@ def main():
     dispatcher.add_handler(telegram.ext.CommandHandler("help", help_command_handler))
     dispatcher.add_handler(telegram.ext.CommandHandler("about", about_command_handler))
     dispatcher.add_handler(telegram.ext.CommandHandler("math", math_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("bold", bold_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("italic", italic_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("monospace", monospace_command_handler))
     
     print("initializing message handlers ...")
     dispatcher.add_handler(telegram.ext.MessageHandler(telegram.ext.Filters.text, hello_message_handler))
+    
+    print("initializing inline query handlers ...")
+    dispatcher.add_handler(telegram.ext.InlineQueryHandler(inline_query_handler))
     
     print("starting poll ...")
     updater.start_polling()
