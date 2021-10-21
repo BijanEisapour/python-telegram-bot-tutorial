@@ -1,25 +1,46 @@
-x = 2
-y = 3
+import os
+import dotenv
+import telegram.ext
 
-result = x + y
-
-print(result)
-print("the final result is " + str(result))
-print(f"the final result is {result}")
-
-print("\n" + 30 * "=" + "\n")
+dotenv.load_dotenv()
+TOKEN = os.getenv("TOKEN")
 
 
-def some_function_name(first_number, second_number):
-    print("in some_function_name")
-    return first_number + second_number
+def start_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    update.message.reply_text("Hello, friend!")
 
 
-def some_other_function_name(first_number: int, second_number: int) -> int:
-    print("in some_other_function_name")
-    return first_number + second_number
+def help_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    update.message.reply_text("""
+List of all commands:
+
+/start - Start the bot
+/help - Show the help message containing list of all commands
+/about - Show the about message containing author information
+    """)
 
 
-print(f"result of some_function_name: {some_function_name(4, 8)}")
-print()
-print(f"result of some_other_function_name: {some_other_function_name(15, 16)}")
+def about_command_handler(update: telegram.Update, context: telegram.ext.CallbackContext) -> None:
+    update.message.reply_text("Developed by @BijanProgrammer")
+
+
+def main():
+    print("initializing updater ...")
+    updater = telegram.ext.Updater(TOKEN, use_context=True)
+    
+    print("initializing dispatcher ...")
+    dispatcher = updater.dispatcher
+    
+    print("initializing command handlers ...")
+    dispatcher.add_handler(telegram.ext.CommandHandler("start", start_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("help", help_command_handler))
+    dispatcher.add_handler(telegram.ext.CommandHandler("about", about_command_handler))
+    
+    print("starting poll ...")
+    updater.start_polling()
+    
+    print("being idle ...")
+    updater.idle()
+
+
+main()
